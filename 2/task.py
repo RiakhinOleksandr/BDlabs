@@ -620,6 +620,7 @@ if __name__ == "__main__":
                     print("Enter element you want to delete (only ukrainian letters):")
                     elem = input()
                     tree.delete_element(elem)
+                    tree.num -= 1
         except ValueError:
             print("Wrong input!")
         except Exception:
