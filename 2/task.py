@@ -594,7 +594,8 @@ if __name__ == "__main__":
             while choose != "0":
                 print()
                 print("Choose option:")
-                print("1 - Print tree\n2 - Insert new element into tree\n3 - Insert multiple elements into tree\n4 - Delete element from tree\n0 - Stop program")
+                print("1 - Print tree\n2 - Insert new element into tree\n3 - Insert multiple elements into tree\n4 - Delete element from tree\n5 - Find element")
+                print("6 - Find all elements greater than\n7 - Find all elements lesser than\n0- - Stop program")
                 choose = input()
                 print()
                 if choose == "1":
@@ -621,6 +622,30 @@ if __name__ == "__main__":
                     elem = input()
                     tree.delete_element(elem)
                     tree.num -= 1
+                elif choose == "5":
+                    print("Enter element you want to find (only ukrainian letters):")
+                    elem = input()
+                    res = tree.find_element(elem)
+                    if type(res) != str:
+                        print(f"\nElement was found: {res}")
+                    else:
+                        print("\nElement was not found")
+                elif choose == "6":
+                    print("Enter element (only ukrainian letters). Program will find all elements greater than given:")
+                    elem = input()
+                    res = tree.find_elements_greater_than(elem)
+                    if len(res) > 0:
+                        print(f"\nElements were found: {res}")
+                    else:
+                        print(f"\nThere are not elements greater than given")
+                elif choose == "7":
+                    print("Enter element (only ukrainian letters). Program will find all elements lesser than given:")
+                    elem = input()
+                    res = tree.find_elements_lesser_than(elem)
+                    if len(res) > 0:
+                        print(f"\nElements were found: {res}")
+                    else:
+                        print(f"\nThere are not elements lesser than given")
         except ValueError:
             print("Wrong input!")
         except Exception:
