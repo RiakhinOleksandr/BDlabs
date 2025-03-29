@@ -35,7 +35,7 @@ try:
     with Session(engine) as session:
         for i in range(df.shape[0]):
             if session.query(Weather).filter_by(country = df.loc[i, "country"], location_name = df.loc[i, "location_name"], last_updated = df.loc[i, "last_updated"]).first() is None:
-                weather = Weather(country = df.loc[i, "country"], location_name = df.loc[i, "location_name"], last_updated = df.loc[i, "last_updated"],
+                weather = Weather(id = i+1, country = df.loc[i, "country"], location_name = df.loc[i, "location_name"], last_updated = df.loc[i, "last_updated"],
                                   temperature = float(df.loc[i, "temperature_celsius"]), wind_speed = float(df.loc[i, "wind_kph"]), 
                                   wind_degree = int(df.loc[i, "wind_degree"]), wind_direction = df.loc[i, "wind_direction"], 
                                   precipitation = float(df.loc[i, "precip_mm"]), humidity = int(df.loc[i, "humidity"]),
