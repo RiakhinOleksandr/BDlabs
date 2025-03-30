@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, Time
+from sqlalchemy import Column, Integer, String, DateTime, Float, Time, Boolean
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.orm import DeclarativeBase, Session
-import pandas as pd
 
 class Base(DeclarativeBase):
     pass
@@ -18,29 +17,44 @@ class Weather(Base):
     wind_speed = Column(Float)
     wind_degree = Column(Integer)
     wind_direction = Column(String(3))
-    precipitation = Column(Float)
-    humidity = Column(Integer)
-    cloud_coverage = Column(Integer)
     sunrise = Column(Time)
     sunset = Column(Time)
 
+class Precipitations(Base):
+    __tablename__ = "precipitations"
+
+    id = Column(Integer, primary_key = True)
+    country = Column(String(32), nullable = False)
+    location_name  = Column(String(22), nullable = False)
+    last_updated = Column(DateTime, nullable = False)
+    precipitation = Column(Float)
+    humidity = Column(Integer)
+    cloud_coverage = Column(Integer)
+    good_weather = Column(Boolean)
+
 try:    
-    columns = ["country", "location_name", "last_updated", "temperature_celsius", "wind_kph", "wind_degree", "wind_direction", "precip_mm", "humidity", "cloud", "sunrise", "sunset"]
-    df = pd.read_csv("GlobalWeatherRepository.csv", usecols = columns)
-    
-    engine = create_engine("postgresql://postgres:12345678@localhost/bd_lab3")
-    if not database_exists(engine.url):
-        create_database(engine.url)
-    Base.metadata.create_all(engine)
-    with Session(engine) as session:
-        for i in range(df.shape[0]):
-            if session.query(Weather).filter_by(country = df.loc[i, "country"], location_name = df.loc[i, "location_name"], last_updated = df.loc[i, "last_updated"]).first() is None:
-                weather = Weather(id = i+1, country = df.loc[i, "country"], location_name = df.loc[i, "location_name"], last_updated = df.loc[i, "last_updated"],
-                                  temperature = float(df.loc[i, "temperature_celsius"]), wind_speed = float(df.loc[i, "wind_kph"]), 
-                                  wind_degree = int(df.loc[i, "wind_degree"]), wind_direction = df.loc[i, "wind_direction"], 
-                                  precipitation = float(df.loc[i, "precip_mm"]), humidity = int(df.loc[i, "humidity"]),
-                                  cloud_coverage = int(df.loc[i, "cloud"]), sunrise = df.loc[i, "sunrise"], sunset = df.loc[i, "sunset"])
-                session.add(weather)
+    engine_postgr = create_engine("postgresql://postgres:12345678@localhost/bd_lab3")
+    with Session(engine_postgr) as session_postgr:
+        weather = session_postgr.query(Weather)
+        precip = session_postgr.query(Precipitations)
+    engine_mysql = create_engine("mysql+pymysql://root:123456789@localhost/bd_lab3")
+    if not database_exists(engine_mysql.url):
+        create_database(engine_mysql.url)
+    Base.metadata.create_all(engine_mysql)
+    with Session(engine_mysql) as session:
+        for w in weather:
+            if session.query(Weather).filter_by(id = w.id).first() is None:
+                weath = Weather(id = w.id, country = w.country, location_name = w.location_name, last_updated = w.last_updated,
+                            temperature = w.temperature, wind_speed = w.wind_speed, wind_degree = w.wind_degree,
+                            wind_direction = w.wind_direction, sunrise = w.sunrise, sunset = w.sunset)
+                session.add(weath)
+                session.commit()
+        for p in precip:
+            if session.query(Precipitations).filter_by(id = p.id).first() is None:
+                pr = Precipitations(id = p.id, country = p.country, location_name = p.location_name, 
+                                last_updated = p.last_updated, precipitation = p.precipitation, humidity = p.humidity, 
+                                cloud_coverage = p.cloud_coverage, good_weather = p.good_weather)
+                session.add(pr)
                 session.commit()
 except Exception as e:
     print(f"Could not connect to database! {repr(e)}")
